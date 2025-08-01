@@ -13,7 +13,7 @@ export const metadata = {
 const mainHallData = {
   title: "Main Hall with Outside Area - Perfect for Large Events",
   desc: "Our spacious Main Hall includes access to paved outside area and kitchen facilities. Ideal for parties, weddings, funerals, wakes, NHS courses, and community events.",
-  image: "/img/main-hall-1.jpeg",
+  image: "/img/80-chairs Large.jpeg",
   bullets: [
     {
       title: "9.81m × 12.64m Space + Outside Paved Area",
