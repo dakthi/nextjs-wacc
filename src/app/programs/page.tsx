@@ -150,8 +150,8 @@ export default function Programs() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   {program.category && (
                     <div className="absolute top-4 left-4">
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide ${categoryColors[program.category]}`}>
-                        {categoryNames[program.category]}
+                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide ${categoryColors[program.category as keyof typeof categoryColors]}`}>
+                        {categoryNames[program.category as keyof typeof categoryNames]}
                       </span>
                     </div>
                   )}
