@@ -95,8 +95,12 @@ export async function GET(request: NextRequest) {
 
     // Generate available time slots (30-minute intervals)
     const timeSlots = []
-    const [startHour, startMinute] = start_time.split(':').map(Number)
-    const [endHour, endMinute] = end_time.split(':').map(Number)
+    const startTimeParts = start_time.split(':').map(Number)
+    const endTimeParts = end_time.split(':').map(Number)
+    const startHour = startTimeParts[0] || 0
+    const startMinute = startTimeParts[1] || 0
+    const endHour = endTimeParts[0] || 23
+    const endMinute = endTimeParts[1] || 59
 
     const slotStart = new Date(targetDate)
     slotStart.setHours(startHour, startMinute, 0, 0)

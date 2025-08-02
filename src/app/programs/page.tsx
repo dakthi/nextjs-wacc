@@ -54,7 +54,7 @@ function organizeProgramsForSchedule(programs: any[]) {
       }
     }
     
-    groupedPrograms[program.category].push(scheduleData)
+    groupedPrograms[program.category]!.push(scheduleData)
   })
   
   return groupedPrograms
@@ -96,7 +96,7 @@ export default async function Programs() {
     title: "Weekly Programs & Activities",
     sections: Object.keys(groupedPrograms).map(category => ({
       title: getCategoryTitle(category),
-      items: groupedPrograms[category]
+      items: groupedPrograms[category] || []
     }))
   }
 

@@ -135,8 +135,12 @@ export default function BookingCalendar({ facility, onBookingSelect }: BookingCa
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     )
 
-    const startTime = sortedSlots[0].startTime
-    const endTime = sortedSlots[sortedSlots.length - 1].endTime
+    const startTime = sortedSlots[0]?.startTime
+    const endTime = sortedSlots[sortedSlots.length - 1]?.endTime
+    
+    if (!startTime || !endTime) {
+      return
+    }
     
     const start = new Date(startTime)
     const end = new Date(endTime)

@@ -274,6 +274,10 @@ export const Faq = ({ data }: FaqProps) => {
   // Use provided data or default sections
   const sectionsToUse = data ? [{ title: "FAQ", icon: "", items: data }] : faqSections;
   const currentSection = sectionsToUse.find(section => section.title === selectedSection) || sectionsToUse[0];
+  
+  if (!currentSection) {
+    return <div>No FAQ sections available</div>;
+  }
 
   return (
     <section className="py-16 bg-white">

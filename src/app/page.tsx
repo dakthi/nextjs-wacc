@@ -174,12 +174,12 @@ export default async function Home() {
   const programScheduleSections = featuredPrograms.length > 0 ? [
     {
       title: "Featured Programs",
-      items: featuredPrograms.slice(0, 6).map(program => ({
+      items: featuredPrograms.slice(0, 6).map((program: any) => ({
         name: program.title,
         subtitle: program.instructor ? `with ${program.instructor}` : undefined,
         description: program.description || undefined,
         schedule: program.schedules.length > 0 
-          ? program.schedules.map(s => s.description).filter((desc): desc is string => desc !== null && desc !== undefined)
+          ? program.schedules.map((s: any) => s.description).filter((desc: any): desc is string => desc !== null && desc !== undefined)
           : ["Schedule available upon inquiry"],
         price: program.price || undefined,
         contact: {
