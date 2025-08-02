@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
       const isPastOrTooSoon = slotStart < minBookingTime
 
       // Check if this slot conflicts with existing bookings
-      const hasConflict = existingBookings.some(booking => {
+      const hasConflict = existingBookings.some((booking: any) => {
         const bookingStart = new Date(booking.start_date_time)
         const bookingEnd = new Date(booking.end_date_time)
         return slotStart < bookingEnd && slotEnd > bookingStart
