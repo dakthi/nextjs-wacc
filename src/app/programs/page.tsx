@@ -118,7 +118,7 @@ export default async function Programs() {
         </SectionTitle>
 
         <div className="grid gap-8 lg:gap-12 mt-16">
-          {programs.map((program) => (
+          {programs.map((program: any) => (
             <div key={program.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               {program.imageUrl && (
                 <div className="h-48 bg-gray-100 relative">
@@ -157,7 +157,7 @@ export default async function Programs() {
                   <div className="mb-6">
                     <h4 className="text-lg font-semibold text-gray-800 mb-3">Schedule</h4>
                     <div className="space-y-2">
-                      {program.schedules.map((schedule, index) => (
+                      {program.schedules.map((schedule: any, index: number) => (
                         <div key={index} className="flex items-center text-gray-700">
                           <span className="w-2 h-2 bg-primary-500 rounded-full mr-3"></span>
                           {schedule.description}
