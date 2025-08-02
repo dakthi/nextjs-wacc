@@ -13,7 +13,7 @@ export default function BookingForm() {
     eventDate: "",
     startTime: "",
     endTime: "",
-    expectedGuests: "",
+    expectedGuests: "", // NEW FIELD
     description: "",
     catering: "",
     isCharity: false,
@@ -23,8 +23,8 @@ export default function BookingForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Create email body
+
+    // Create email body including Expected Guests
     const emailBody = `
 New Booking Enquiry - West Acton Community Centre
 
@@ -32,7 +32,7 @@ Contact Details:
 Name: ${formData.name}
 Email: ${formData.email}
 Phone: ${formData.phone}
-Organization: ${formData.organization || 'N/A'}
+Organization: ${formData.organization || "N/A"}
 
 Event Details:
 Event Type: ${formData.eventType}
@@ -43,26 +43,35 @@ Expected Guests: ${formData.expectedGuests}
 Description: ${formData.description}
 
 Additional Information:
-Catering Requirements: ${formData.catering || 'None specified'}
-Charity: ${formData.isCharity ? 'Yes' : 'No'}${formData.isCharity && formData.charityNumber ? ` (${formData.charityNumber})` : ''}
-Regular Booking: ${formData.isRegularBooking ? 'Yes' : 'No'}
+Catering Requirements: ${formData.catering || "None specified"}
+Charity: ${formData.isCharity ? "Yes" : "No"}${
+      formData.isCharity && formData.charityNumber
+        ? ` (${formData.charityNumber})`
+        : ""
+    }
+Regular Booking: ${formData.isRegularBooking ? "Yes" : "No"}
     `;
 
-    // Create mailto link
-    const subject = encodeURIComponent(`Booking Enquiry - ${formData.eventType} - ${formData.eventDate}`);
+    const subject = encodeURIComponent(
+      `Booking Enquiry - ${formData.eventType} - ${formData.eventDate}`
+    );
     const body = encodeURIComponent(emailBody);
     const mailtoLink = `mailto:info@westactoncentre.co.uk?subject=${subject}&body=${body}`;
-    
+
     window.location.href = mailtoLink;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value, type } = e.target;
-    if (type === 'checkbox') {
+    if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
+      setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -70,9 +79,11 @@ Regular Booking: ${formData.isRegularBooking ? 'Yes' : 'No'}
     <form onSubmit={handleSubmit} className="grid gap-6 md:grid-cols-2">
       {/* Contact Information */}
       <div className="md:col-span-2">
-        <h4 className="text-lg font-semibold text-primary-600 mb-4 uppercase tracking-wide">Contact Information</h4>
+        <h4 className="text-lg font-semibold text-primary-600 mb-4 uppercase tracking-wide">
+          Contact Information
+        </h4>
       </div>
-      
+
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
           Full Name *
@@ -134,7 +145,9 @@ Regular Booking: ${formData.isRegularBooking ? 'Yes' : 'No'}
 
       {/* Event Details */}
       <div className="md:col-span-2 mt-6">
-        <h4 className="text-lg font-semibold text-primary-600 mb-4 uppercase tracking-wide">Event Details</h4>
+        <h4 className="text-lg font-semibold text-primary-600 mb-4 uppercase tracking-wide">
+          Event Details
+        </h4>
       </div>
 
       <div>
@@ -228,7 +241,7 @@ Regular Booking: ${formData.isRegularBooking ? 'Yes' : 'No'}
           {Array.from({ length: 17 }, (_, i) => {
             const hour = i + 7; // 7 AM to 11 PM
             return (
-              <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
+              <option key={hour} value={`${hour.toString().padStart(2, "0")}:00`}>
                 {hour}:00
               </option>
             );
@@ -252,7 +265,7 @@ Regular Booking: ${formData.isRegularBooking ? 'Yes' : 'No'}
           {Array.from({ length: 17 }, (_, i) => {
             const hour = i + 7;
             return (
-              <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
+              <option key={hour} value={`${hour.toString().padStart(2, "0")}:00`}>
                 {hour}:00
               </option>
             );
@@ -292,7 +305,9 @@ Regular Booking: ${formData.isRegularBooking ? 'Yes' : 'No'}
 
       {/* Additional Information */}
       <div className="md:col-span-2 mt-6">
-        <h4 className="text-lg font-semibold text-primary-600 mb-4 uppercase tracking-wide">Additional Information</h4>
+        <h4 className="text-lg font-semibold text-primary-600 mb-4 uppercase tracking-wide">
+          Additional Information
+        </h4>
       </div>
 
       <div className="md:col-span-2">
@@ -305,9 +320,11 @@ Regular Booking: ${formData.isRegularBooking ? 'Yes' : 'No'}
               onChange={handleChange}
               className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
             />
-            <span className="ml-2 text-sm text-gray-700">This is a registered charity event</span>
+            <span className="ml-2 text-sm text-gray-700">
+              This is a registered charity event
+            </span>
           </label>
-          
+
           <label className="flex items-center">
             <input
               type="checkbox"
@@ -316,14 +333,19 @@ Regular Booking: ${formData.isRegularBooking ? 'Yes' : 'No'}
               onChange={handleChange}
               className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
             />
-            <span className="ml-2 text-sm text-gray-700">This is for regular bookings</span>
+            <span className="ml-2 text-sm text-gray-700">
+              This is for regular bookings
+            </span>
           </label>
         </div>
       </div>
 
       {formData.isCharity && (
         <div>
-          <label htmlFor="charityNumber" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="charityNumber"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Charity Registration Number
           </label>
           <input
@@ -345,7 +367,8 @@ Regular Booking: ${formData.isRegularBooking ? 'Yes' : 'No'}
           Send Booking Enquiry
         </button>
         <p className="text-sm text-gray-600 mt-4 text-center">
-          This will open your email client with the booking details pre-filled. We'll respond within 24 hours with availability and pricing.
+          This will open your email client with the booking details pre-filled.
+          We'll respond within 24 hours with availability and pricing.
         </p>
       </div>
     </form>

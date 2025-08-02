@@ -1,31 +1,65 @@
 import React from "react";
 import { Container } from "@/components/Container";
+import { prisma } from "@/lib/prisma";
 
-const testimonials = [
+interface Testimonial {
+  id: number;
+  quote: string;
+  authorName: string;
+  authorTitle: string | null;
+  avatarUrl: string | null;
+}
+
+// Default fallback testimonials
+const fallbackTestimonials = [
   {
-    id: "1",
+    id: 1,
     quote: "WACC has been such a blessing for our family. The Stay & Play sessions give our toddler a chance to socialize while I connect with other parents in the community.",
-    name: "Sarah Johnson",
-    title: "Parent, West Acton resident",
-    avatar: "/img/Sample_User_Icon.png"
+    authorName: "Sarah Johnson",
+    authorTitle: "Parent, West Acton resident",
+    avatarUrl: "/img/Sample_User_Icon.png"
   },
   {
-    id: "2",
+    id: 2,
     quote: "I've been attending Taekwondo classes here for 3 years. The instructors are excellent and the community spirit is amazing. It's not just exercise - it's a second home.",
-    name: "David Chen",
-    title: "Taekwondo student",
-    avatar: "/img/Sample_User_Icon.png"
+    authorName: "David Chen",
+    authorTitle: "Taekwondo student",
+    avatarUrl: "/img/Sample_User_Icon.png"
   },
   {
-    id: "3",
+    id: 3,
     quote: "We recently held our community fundraiser here and the staff were incredibly helpful. The Main Hall was perfect for our event and the kitchen facilities made catering so much easier.",
-    name: "Amira Hassan",
-    title: "Community organizer",
-    avatar: "/img/Sample_User_Icon.png"
+    authorName: "Amira Hassan",
+    authorTitle: "Community organizer",
+    avatarUrl: "/img/Sample_User_Icon.png"
   },
 ];
 
-export const Testimonials = () => {
+async function getTestimonials(): Promise<Testimonial[]> {
+  try {
+    const testimonials = await prisma.testimonial.findMany({
+      where: { active: true },
+      orderBy: { displayOrder: 'asc' },
+      select: {
+        id: true,
+        quote: true,
+        authorName: true,
+        authorTitle: true,
+        avatarUrl: true,
+      }
+    });
+
+    // Return database testimonials if available, otherwise fallback
+    return testimonials.length > 0 ? testimonials : fallbackTestimonials;
+  } catch (error) {
+    console.error('Failed to load testimonials:', error);
+    return fallbackTestimonials;
+  }
+}
+
+export const Testimonials = async () => {
+  const testimonials = await getTestimonials();
+  
   return (
     <section className="py-16 bg-gray-50">
       <Container>
@@ -40,7 +74,13 @@ export const Testimonials = () => {
       
       <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
         {testimonials.map((testimonial) => (
-          <TestimonialCard key={testimonial.id} {...testimonial} />
+          <TestimonialCard 
+            key={testimonial.id}
+            quote={testimonial.quote}
+            avatar={testimonial.avatarUrl || "/img/Sample_User_Icon.png"}
+            name={testimonial.authorName}
+            title={testimonial.authorTitle || ""}
+          />
         ))}
       </div>
       </Container>

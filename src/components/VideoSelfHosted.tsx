@@ -1,13 +1,24 @@
 import Image from "next/image";
+import { SiteSettings } from "@/lib/settings";
 
-export function VideoSelfHosted() {
+interface VideoSelfHostedProps {
+  settings?: SiteSettings;
+}
+
+export function VideoSelfHosted({ settings }: VideoSelfHostedProps) {
+  const siteTitle = settings?.site_title || 'West Acton Community Centre';
+  const heroSubtitle = settings?.hero_subtitle || 'Your local hub bringing together 2,000+ residents through education, leisure, and recreational programs';
+  const residentsServed = settings?.residents_served || '2,000+';
+  const weeklyPrograms = settings?.weekly_programs || '15+';
+  const openingDays = settings?.opening_hours_text || '7';
+  const mainHallCapacity = settings?.main_hall_capacity || '120';
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
           src="/img/main-hall.jpeg"
-          alt="West Acton Community Centre Main Hall"
+          alt={`${siteTitle} Main Hall`}
           fill
           className="object-cover"
           priority
@@ -20,14 +31,13 @@ export function VideoSelfHosted() {
       <div className="relative z-10 flex items-center justify-center h-full">
         <div className="text-center text-white max-w-4xl px-6">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6">
-            WELCOME TO WEST ACTON
+            WELCOME TO
             <br />
-            <span className="text-accent-400">COMMUNITY CENTRE</span>
+            <span className="text-accent-400">{siteTitle.toUpperCase()}</span>
           </h1>
           
           <p className="text-lg md:text-xl lg:text-2xl mb-8 max-w-2xl mx-auto font-light">
-            Your local hub bringing together 2,000+ residents through education, 
-            leisure, and recreational programs
+            {heroSubtitle}
           </p>
 
           {/* Single CTA Button */}
@@ -41,19 +51,19 @@ export function VideoSelfHosted() {
           {/* Quick Stats */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-accent-400">2,000+</div>
+              <div className="text-2xl md:text-3xl font-bold text-accent-400">{residentsServed}</div>
               <div className="text-sm uppercase tracking-wide">Residents</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-accent-400">15+</div>
+              <div className="text-2xl md:text-3xl font-bold text-accent-400">{weeklyPrograms}</div>
               <div className="text-sm uppercase tracking-wide">Programs</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-accent-400">7</div>
+              <div className="text-2xl md:text-3xl font-bold text-accent-400">{openingDays.replace(/\D/g, '') || '7'}</div>
               <div className="text-sm uppercase tracking-wide">Days Open</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-accent-400">120</div>
+              <div className="text-2xl md:text-3xl font-bold text-accent-400">{mainHallCapacity}</div>
               <div className="text-sm uppercase tracking-wide">Max Capacity</div>
             </div>
           </div>

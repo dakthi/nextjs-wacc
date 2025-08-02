@@ -1,6 +1,7 @@
 import { Container } from "@/components/Container";
 import { TextOnlyHero } from "@/components/TextOnlyHero";
 import { SectionTitle } from "@/components/SectionTitle";
+import GoogleMap from "@/components/GoogleMap";
 
 export const metadata = {
   title: "Contact & Booking | West Acton Community Centre",
@@ -11,25 +12,21 @@ export const metadata = {
 const contactInfo = [
   {
     type: "General Enquiries",
-    icon: "📧",
     value: "info@westactoncentre.co.uk",
     description: "For bookings, program information, and general questions"
   },
   {
     type: "Phone",
-    icon: "📞", 
     value: "020 8992 8899",
     description: "Call during office hours for immediate assistance"
   },
   {
     type: "Ealing Council",
-    icon: "🏛️",
     value: "customers@ealing.gov.uk",
     description: "For council-related enquiries and services"
   },
   {
     type: "Website",
-    icon: "🌐",
     value: "www.westactoncentre.co.uk",
     description: "Visit our main website for updates and information"
   },
@@ -55,19 +52,16 @@ const openingHours = [
 // Location and transport
 const locationInfo = [
   {
-    icon: "🚇",
     title: "Underground",
     details: "West Acton Station (Central Line)",
     description: "Just minutes walk from the station"
   },
   {
-    icon: "🚌", 
     title: "Bus Routes",
     details: "207, 218, H40",
     description: "Multiple bus routes serve the area"
   },
   {
-    icon: "🚗",
     title: "Parking",
     details: "Onsite parking available",
     description: "Free parking for visitors and event attendees"
@@ -107,20 +101,15 @@ export default function Contact() {
         <div className="grid gap-8 lg:grid-cols-2 mt-16">
           {contactInfo.map((contact, index) => (
             <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-              <div className="flex items-start space-x-4">
-                <div className="text-4xl">{contact.icon}</div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-heading font-bold text-primary-600 mb-3 uppercase tracking-tight">
-                    {contact.type}
-                  </h3>
-                  <p className="text-2xl font-bold text-gray-800 mb-3">
-                    {contact.value}
-                  </p>
-                  <p className="text-gray-700 leading-relaxed">
-                    {contact.description}
-                  </p>
-                </div>
-              </div>
+              <h3 className="text-xl font-heading font-bold text-primary-600 mb-3 uppercase tracking-tight">
+                {contact.type}
+              </h3>
+              <p className="text-2xl font-bold text-gray-800 mb-3">
+                {contact.value}
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                {contact.description}
+              </p>
             </div>
           ))}
         </div>
@@ -138,7 +127,7 @@ export default function Contact() {
         <div className="mt-16">
           <div className="bg-primary-50 rounded-2xl p-8 mb-12 text-center">
             <h3 className="text-3xl font-heading font-bold text-primary-600 mb-4 uppercase tracking-tight">
-              📍 West Acton Community Centre
+              West Acton Community Centre
             </h3>
             <p className="text-xl font-semibold text-gray-800 mb-2">
               Churchill Gardens, Acton, London W3 0JN
@@ -177,7 +166,6 @@ export default function Contact() {
           <div className="grid gap-8 lg:grid-cols-3 mb-12">
             {locationInfo.map((info, index) => (
               <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-                <div className="text-5xl mb-4">{info.icon}</div>
                 <h3 className="text-lg font-heading font-bold text-primary-600 mb-3 uppercase tracking-tight">
                   {info.title}
                 </h3>
@@ -189,6 +177,36 @@ export default function Contact() {
                 </p>
               </div>
             ))}
+          </div>
+
+          {/* Google Map */}
+          <div className="mb-12">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-heading font-bold text-primary-600 mb-4 uppercase tracking-tight">
+                Find Us on the Map
+              </h3>
+              <p className="text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
+                West Acton Community Centre is conveniently located in Churchill Gardens, 
+                just minutes from West Acton tube station and multiple bus routes.
+              </p>
+            </div>
+            <GoogleMap 
+              address="West Acton Community Centre, Churchill Gardens, Acton, London W3 0JN"
+              className="w-full h-96 rounded-lg shadow-md border border-gray-200"
+            />
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-600">
+                Churchill Gardens, Acton, London W3 0JN
+              </p>
+              <a 
+                href="https://www.google.com/maps/dir/?api=1&destination=Churchill%20Gardens%2C%20Acton%2C%20London%20W3%200JN"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-2 text-primary-600 hover:text-primary-800 font-medium text-sm underline"
+              >
+                Get Directions →
+              </a>
+            </div>
           </div>
         </div>
       </Container>

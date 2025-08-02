@@ -1,109 +1,18 @@
 import { Container } from "@/components/Container";
 import { TextOnlyHero } from "@/components/TextOnlyHero";
 import { SectionTitle } from "@/components/SectionTitle";
+import ProgramSchedule from "@/components/ProgramSchedule";
+import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
 
-export const metadata = {
-  title: "Programs & Activities | West Acton Community Centre",
-  description: "Join our 15+ weekly programs including Stay & Play, Taekwondo, Zumba, Kumon, Judo, and cultural groups. Something for every age and interest.",
-};
-
-// Program data
-const programs = [
-  {
-    id: "stay-play",
-    title: "West Acton Stay & Play",
-    description: "Drop-in session run by professionals with toys, arts & crafts, painting, cars & tractors, and soft play in our spacious hall.",
-    schedule: [
-      "Monday: 10:00 AM - 11:45 AM",
-      "Wednesday: 10:00 AM - 11:45 AM", 
-      "Friday: 10:00 AM - 11:45 AM"
-    ],
-    cost: "Members £4.00 per session, siblings £1.00",
-    booking: "No booking required - just come along!",
-    ageGroup: "Young children & parents",
-    category: "early-years",
-  },
-  {
-    id: "taekwondo",
-    title: "West Acton Taekwondo",
-    description: "Traditional martial arts training for children and adults, building discipline, fitness, and confidence.",
-    schedule: [
-      "Children (Ages 4-13):",
-      "Wednesday: 5:00 PM - 7:00 PM",
-      "Sunday: 10:00 AM - 11:30 AM",
-      "",
-      "Adults (Ages 14+):",
-      "Friday: 6:30 PM - 8:30 PM",
-      "Sunday: 11:30 AM - 2:00 PM (Technical)",
-      "Sunday: 1:30 PM - 3:00 PM (Sparring)"
-    ],
-    ageGroup: "Ages 4+",
-    category: "martial-arts",
-  },
-  {
-    id: "kung-fu",
-    title: "Fitness Exercise Club - Lau Gar Kung Fu",
-    description: "Traditional Shaolin-based martial art with structured training methods focusing on fitness and technique.",
-    schedule: ["Tuesday: 7:30 PM - 9:00 PM"],
-    contact: {
-      email: "b.k.f.f@hotmail.co.uk",
-      phone: "07572 718 870"
-    },
-    ageGroup: "Adults",
-    category: "martial-arts",
-  },
-  {
-    id: "kumon",
-    title: "Kumon Maths & English (and Kokugo - Japanese)",
-    description: "Educational support in English, Maths, and Japanese language with local tutor Teruko Mori.",
-    schedule: [
-      "Tuesday: 3:00 PM - 6:00 PM",
-      "Saturday: 10:00 AM - 1:00 PM"
-    ],
-    contact: {
-      email: "actonwest@kumoncentre.co.uk",
-      website: "www.kumon.co.uk/Acton-West"
-    },
-    ageGroup: "Children & young people",
-    category: "education",
-    image: "/img/kumon.jpeg",
-  },
-  {
-    id: "judo",
-    title: "Ealing Judo Club",
-    description: "Promotes fitness, confidence, friendship, and fun through judo training for all skill levels.",
-    contact: {
-      email: "EalingJudoClub@hotmail.com",
-      website: "www.ealingjudoclub.com"
-    },
-    ageGroup: "All ages",
-    category: "martial-arts",
-  },
-  {
-    id: "zumba",
-    title: "Zumba with Anae",
-    description: "High-energy dance fitness classes combining fun choreography with great music.",
-    schedule: [
-      "Tuesday: 10:00 AM - 11:00 AM",
-      "Tuesday: 6:15 PM - 7:15 PM"
-    ],
-    booking: "Book at anae-fitness.com",
-    ageGroup: "Adults",
-    category: "fitness",
-  },
-];
-
-// Community groups
-const communityGroups = [
-  {
-    title: "The Society of Afghan Residents",
-    description: "Cultural community group supporting Afghan families in West Acton"
-  },
-  {
-    title: "Arab Families Community Group", 
-    description: "Cultural support and social activities for Arab families in the local area"
-  },
-];
+export async function generateMetadata() {
+  const settings = await getSettings();
+  
+  return {
+    title: `Programs & Activities | ${settings.site_title}`,
+    description: `Join our ${settings.weekly_programs} weekly programs including Stay & Play, Taekwondo, Zumba, Kumon, Judo, and cultural groups. Something for every age and interest.`,
+  };
+}
 
 // Category colors for visual organization
 const categoryColors = {
@@ -120,12 +29,83 @@ const categoryNames = {
   "fitness": "Fitness",
 };
 
-export default function Programs() {
+// Helper function to organize programs by category for ProgramSchedule component
+function organizeProgramsForSchedule(programs: any[]) {
+  const groupedPrograms: { [key: string]: any[] } = {}
+  
+  programs.forEach(program => {
+    if (!groupedPrograms[program.category]) {
+      groupedPrograms[program.category] = []
+    }
+    
+    // Transform program data for ProgramSchedule component
+    const scheduleData = {
+      name: program.title,
+      subtitle: program.instructor ? `with ${program.instructor}` : undefined,
+      description: program.description,
+      schedule: program.schedules.map((s: any) => s.description).filter(Boolean),
+      price: program.price,
+      ageGroup: program.ageGroup,
+      instructor: program.instructor,
+      contact: {
+        email: program.contactEmail,
+        phone: program.contactPhone,
+        website: program.contactWebsite
+      }
+    }
+    
+    groupedPrograms[program.category].push(scheduleData)
+  })
+  
+  return groupedPrograms
+}
+
+// Helper function to get category title
+function getCategoryTitle(category: string): string {
+  const categoryTitles: { [key: string]: string } = {
+    'early-years': 'Early Years Programs',
+    'martial-arts': 'Martial Arts & Combat Sports',
+    'education': 'Education & Learning',
+    'fitness': 'Fitness & Wellness'
+  }
+  return categoryTitles[category] || category
+}
+
+export default async function Programs() {
+  // Fetch programs from database
+  const programs = await prisma.program.findMany({
+    where: { active: true },
+    include: {
+      schedules: {
+        where: { active: true },
+        orderBy: { id: 'asc' }
+      }
+    },
+    orderBy: { createdAt: 'asc' }
+  })
+
+  // Fetch community groups from database
+  const communityGroups = await prisma.communityGroup.findMany({
+    where: { active: true },
+    orderBy: { id: 'asc' }
+  })
+
+  // Organize programs for ProgramSchedule component
+  const groupedPrograms = organizeProgramsForSchedule(programs)
+  const programScheduleData = {
+    title: "Weekly Programs & Activities",
+    sections: Object.keys(groupedPrograms).map(category => ({
+      title: getCategoryTitle(category),
+      items: groupedPrograms[category]
+    }))
+  }
+
   return (
     <div>
       <TextOnlyHero 
         title="Programs & Activities"
         subtitle="15+ regular programs every week for all ages and interests"
+        backgroundImage="/img/IMG_1290 Large.jpeg"
       />
 
       <Container>
@@ -133,17 +113,17 @@ export default function Programs() {
           preTitle="Weekly Programs"
           title="Something for Everyone"
         >
-          Our diverse range of programs serves the entire West Acton community, 
-          from early years activities to adult fitness and cultural groups.
+          From early years to senior activities, martial arts to educational support, 
+          we offer diverse programs designed to bring our community together.
         </SectionTitle>
 
         <div className="grid gap-8 lg:gap-12 mt-16">
           {programs.map((program) => (
             <div key={program.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              {program.image && (
+              {program.imageUrl && (
                 <div className="h-48 bg-gray-100 relative">
                   <img
-                    src={program.image}
+                    src={program.imageUrl}
                     alt={program.title}
                     className="w-full h-full object-cover"
                   />
@@ -168,66 +148,62 @@ export default function Programs() {
                   <h3 className="text-2xl font-heading font-bold text-primary-600 mb-3 uppercase tracking-tight">
                     {program.title}
                   </h3>
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed">
                     {program.description}
                   </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-8">
-                  {program.schedule && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-primary-600 mb-3 uppercase tracking-wide text-sm">Schedule</h4>
-                      <ul className="text-gray-800 space-y-2">
-                        {program.schedule.map((time, index) => (
-                          <li key={index} className={`${time === "" ? "h-2" : "font-medium"}`}>
-                            {time}
-                          </li>
-                        ))}
-                      </ul>
+                {program.schedules && program.schedules.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-3">Schedule</h4>
+                    <div className="space-y-2">
+                      {program.schedules.map((schedule, index) => (
+                        <div key={index} className="flex items-center text-gray-700">
+                          <span className="w-2 h-2 bg-primary-500 rounded-full mr-3"></span>
+                          {schedule.description}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  {program.price && (
+                    <div className="bg-primary-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-primary-600 mb-2">Cost</h4>
+                      <p className="text-gray-700">{program.price}</p>
                     </div>
                   )}
-
-                  <div className="space-y-4">
-                    {program.cost && (
-                      <div className="bg-accent-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-primary-600 mb-2 uppercase tracking-wide text-sm">Cost</h4>
-                        <p className="text-gray-800 font-semibold text-lg">{program.cost}</p>
+                  
+                  {program.bookingInfo && (
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-green-600 mb-2">Booking</h4>
+                      <p className="text-gray-700">{program.bookingInfo}</p>
+                    </div>
+                  )}
+                  
+                  {(program.contactEmail || program.contactPhone || program.contactWebsite) && (
+                    <div className="bg-blue-50 rounded-lg p-4 md:col-span-2">
+                      <h4 className="font-semibold text-blue-600 mb-3">Contact Information</h4>
+                      <div className="space-y-2">
+                        {program.contactEmail && (
+                          <p className="text-gray-700">
+                            <span className="font-medium">Email:</span> {program.contactEmail}
+                          </p>
+                        )}
+                        {program.contactPhone && (
+                          <p className="text-gray-700">
+                            <span className="font-medium">Phone:</span> {program.contactPhone}
+                          </p>
+                        )}
+                        {program.contactWebsite && (
+                          <p className="text-gray-700">
+                            <span className="font-medium">Website:</span> {program.contactWebsite}
+                          </p>
+                        )}
                       </div>
-                    )}
-
-                    {program.booking && (
-                      <div className="bg-primary-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-primary-600 mb-2 uppercase tracking-wide text-sm">Booking</h4>
-                        <p className="text-gray-800 font-medium">{program.booking}</p>
-                      </div>
-                    )}
-
-                    {program.contact && (
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-primary-600 mb-3 uppercase tracking-wide text-sm">Contact</h4>
-                        <div className="text-gray-800 space-y-2">
-                          {program.contact.email && (
-                            <p className="flex items-center">
-                              <span className="mr-2">📧</span>
-                              <span className="font-medium">{program.contact.email}</span>
-                            </p>
-                          )}
-                          {program.contact.phone && (
-                            <p className="flex items-center">
-                              <span className="mr-2">📞</span>
-                              <span className="font-medium">{program.contact.phone}</span>
-                            </p>
-                          )}
-                          {program.contact.website && (
-                            <p className="flex items-center">
-                              <span className="mr-2">🌐</span>
-                              <span className="font-medium">{program.contact.website}</span>
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -235,48 +211,35 @@ export default function Programs() {
         </div>
       </Container>
 
+      {/* Use ProgramSchedule component for organized view */}
+      <Container>
+        <ProgramSchedule
+          title={programScheduleData.title}
+          sections={programScheduleData.sections}
+          bgColor="bg-gray-50"
+          textColor="text-gray-800"
+        />
+      </Container>
+
       <Container>
         <SectionTitle
           preTitle="Community Groups"
-          title="Cultural & Community Organizations"
+          title="Cultural & Social Groups"
         >
-          We proudly host several community and cultural groups that serve 
-          the diverse residents of West Acton.
+          Our centre hosts various community groups that celebrate different cultures and bring people together.
         </SectionTitle>
 
-        <div className="grid gap-6 lg:grid-cols-2 mt-16">
-          {communityGroups.map((group, index) => (
-            <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-16">
+          {communityGroups.map((group) => (
+            <div key={group.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-heading font-bold text-primary-600 mb-3 uppercase tracking-tight">
                 {group.title}
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-700 leading-relaxed">
                 {group.description}
               </p>
             </div>
           ))}
-        </div>
-      </Container>
-
-      <Container>
-        <div className="mt-16 text-center">
-          <div className="bg-indigo-100 dark:bg-indigo-900 rounded-2xl p-8">
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-              Want to Start a New Program?
-            </h3>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-              We're always looking to add new programs that serve our community's needs. 
-              Contact us to discuss your ideas!
-            </p>
-            <div className="space-y-2">
-              <p className="text-lg font-medium text-gray-800 dark:text-white">
-                📧 info@westactoncentre.co.uk
-              </p>
-              <p className="text-lg font-medium text-gray-800 dark:text-white">
-                📞 020 8992 8899
-              </p>
-            </div>
-          </div>
         </div>
       </Container>
     </div>

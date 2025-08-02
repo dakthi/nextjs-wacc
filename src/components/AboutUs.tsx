@@ -126,6 +126,75 @@ const AboutUs = () => {
               </div>
             </div>
           </div>
+
+          {/* Certificates and Documentation */}
+          <div className="mt-16">
+            <div className="text-center mb-12">
+              <h3 className="text-2xl font-heading font-bold text-primary-600 mb-4 uppercase tracking-tight">
+                Certifications & Documentation
+              </h3>
+              <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
+                We maintain all necessary certifications and documentation to ensure our facility meets 
+                professional standards for safety, hygiene, and insurance coverage.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-48 bg-gray-100 relative">
+                  <img
+                    src="/img/certificate-insurance Large.jpeg"
+                    alt="Building and Public Liability Insurance Certificate"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                    Insurance Certificate
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    Comprehensive building and public liability insurance coverage
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-48 bg-gray-100 relative">
+                  <img
+                    src="/img/certificate-hygiene Large.jpeg"
+                    alt="Food Hygiene Certificate"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                    Hygiene Certificate
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    Food safety and hygiene standards certification
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-48 bg-gray-100 relative">
+                  <img
+                    src="/img/fire-procedure Large.jpeg"
+                    alt="Fire Safety Procedures"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                    Fire Safety Procedures
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    Emergency procedures and fire safety protocols
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </Container>
     </div>
