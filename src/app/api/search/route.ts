@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         take: 10
       })
 
-      programs.forEach(program => {
+      programs.forEach((program: any) => {
         results.push({
           id: `program-${program.id}`,
           title: program.title,
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
         take: 10
       })
 
-      facilities.forEach(facility => {
+      facilities.forEach((facility: any) => {
         results.push({
           id: `facility-${facility.id}`,
           title: facility.name,
@@ -154,7 +154,7 @@ export async function GET(request: NextRequest) {
         take: 5
       })
 
-      faqItems.forEach(faq => {
+      faqItems.forEach((faq: any) => {
         results.push({
           id: `faq-${faq.id}`,
           title: faq.question,
@@ -211,8 +211,8 @@ export async function GET(request: NextRequest) {
       }
     ]
 
-    staticPages.forEach(page => {
-      if (page.keywords.some(keyword => keyword.includes(searchTerm) || searchTerm.includes(keyword))) {
+    staticPages.forEach((page: any) => {
+      if (page.keywords.some((keyword: any) => keyword.includes(searchTerm) || searchTerm.includes(keyword))) {
         results.push(page.result)
       }
     })
