@@ -179,7 +179,7 @@ export default async function Home() {
         subtitle: program.instructor ? `with ${program.instructor}` : undefined,
         description: program.description || undefined,
         schedule: program.schedules.length > 0 
-          ? program.schedules.map(s => s.description).filter(Boolean)
+          ? program.schedules.map(s => s.description).filter((desc): desc is string => desc !== null && desc !== undefined)
           : ["Schedule available upon inquiry"],
         price: program.price || undefined,
         contact: {

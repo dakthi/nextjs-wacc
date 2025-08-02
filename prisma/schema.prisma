@@ -42,18 +42,20 @@ model ProgramSchedule {
 }
 
 model Facility {
-  id          Int      @id @default(autoincrement())
-  name        String
-  subtitle    String?
-  description String?
-  capacity    Int?
-  dimensions  String?
-  hourlyRate  Decimal? @map("hourly_rate") @db.Decimal(8, 2)
-  features    Json?
-  imageUrl    String?  @map("image_url")
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  subtitle             String?
+  description          String?
+  capacity             Int?
+  dimensions           String?
+  hourlyRate           Decimal?               @map("hourly_rate") @db.Decimal(8, 2)
+  features             Json?
+  imageUrl             String?                @map("image_url")
+  active               Boolean                @default(true)
+  createdAt            DateTime               @default(now()) @map("created_at")
+  updatedAt            DateTime               @updatedAt @map("updated_at")
+  booking_availability booking_availability[]
+  bookings             bookings[]
 
   @@map("facilities")
 }
@@ -206,4 +208,36 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verificationtokens")
+}
+
+model booking_availability {
+  id           Int      @id @default(autoincrement())
+  facility_id  Int
+  day_of_week  Int
+  start_time   String
+  end_time     String
+  is_available Boolean  @default(true)
+  facilities   Facility @relation(fields: [facility_id], references: [id])
+
+  @@unique([facility_id, day_of_week])
+}
+
+model bookings {
+  id                Int      @id @default(autoincrement())
+  facility_id       Int
+  customer_name     String
+  customer_email    String
+  customer_phone    String?
+  event_title       String
+  event_description String?
+  start_date_time   DateTime
+  end_date_time     DateTime
+  total_hours       Decimal  @db.Decimal(4, 2)
+  hourly_rate       Decimal? @db.Decimal(8, 2)
+  total_cost        Decimal? @db.Decimal(10, 2)
+  status            String   @default("pending")
+  notes             String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime
+  facilities        Facility @relation(fields: [facility_id], references: [id])
 }

@@ -20,7 +20,7 @@ const SETTING_TYPES = [
   { value: 'json', label: 'JSON' }
 ]
 
-const DEFAULT_SETTINGS = [
+const DEFAULT_SETTINGS: Omit<SiteSetting, 'id' | 'updatedAt'>[] = [
   {
     key: 'site_title',
     value: 'West Acton Community Centre',
@@ -148,10 +148,13 @@ export default function SettingsManagement() {
         const existing = settingsMap.get(defaultSetting.key)
         return existing || {
           id: 0,
-          ...defaultSetting,
+          key: defaultSetting.key,
+          value: defaultSetting.value,
+          type: defaultSetting.type,
+          description: defaultSetting.description,
           updatedAt: new Date().toISOString()
         }
-      })
+      }) as SiteSetting[]
 
       // Add any additional settings not in defaults
       data.forEach((setting: SiteSetting) => {

@@ -17,10 +17,10 @@ export async function GET(
       )
     }
 
-    const booking = await prisma.booking.findUnique({
+    const booking = await prisma.bookings.findUnique({
       where: { id },
       include: {
-        facility: {
+        facilities: {
           select: {
             id: true,
             name: true,
@@ -77,19 +77,19 @@ export async function PUT(
     const {
       status,
       notes,
-      customerName,
-      customerEmail,
-      customerPhone,
-      eventTitle,
-      eventDescription,
-      startDateTime,
-      endDateTime
+      customer_name,
+      customer_email,
+      customer_phone,
+      event_title,
+      event_description,
+      start_date_time,
+      end_date_time
     } = body
 
     // Get existing booking
-    const existingBooking = await prisma.booking.findUnique({
+    const existingBooking = await prisma.bookings.findUnique({
       where: { id },
-      include: { facility: true }
+      include: { facilities: true }
     })
 
     if (!existingBooking) {
@@ -103,16 +103,16 @@ export async function PUT(
 
     if (status !== undefined) updateData.status = status
     if (notes !== undefined) updateData.notes = notes
-    if (customerName !== undefined) updateData.customerName = customerName
-    if (customerEmail !== undefined) updateData.customerEmail = customerEmail
-    if (customerPhone !== undefined) updateData.customerPhone = customerPhone
-    if (eventTitle !== undefined) updateData.eventTitle = eventTitle
-    if (eventDescription !== undefined) updateData.eventDescription = eventDescription
+    if (customer_name !== undefined) updateData.customer_name = customer_name
+    if (customer_email !== undefined) updateData.customer_email = customer_email
+    if (customer_phone !== undefined) updateData.customer_phone = customer_phone
+    if (event_title !== undefined) updateData.event_title = event_title
+    if (event_description !== undefined) updateData.event_description = event_description
 
     // Handle datetime updates
-    if (startDateTime || endDateTime) {
-      const start = startDateTime ? new Date(startDateTime) : existingBooking.startDateTime
-      const end = endDateTime ? new Date(endDateTime) : existingBooking.endDateTime
+    if (start_date_time || end_date_time) {
+      const start = start_date_time ? new Date(start_date_time) : existingBooking.start_date_time
+      const end = end_date_time ? new Date(end_date_time) : existingBooking.end_date_time
 
       if (start >= end) {
         return NextResponse.json(
@@ -122,15 +122,15 @@ export async function PUT(
       }
 
       // Check for conflicts (excluding current booking)
-      const conflictingBookings = await prisma.booking.findMany({
+      const conflictingBookings = await prisma.bookings.findMany({
         where: {
-          facilityId: existingBooking.facilityId,
+          facility_id: existingBooking.facility_id,
           id: { not: id },
           status: { in: ['pending', 'confirmed'] },
           OR: [
             {
-              startDateTime: { lt: end },
-              endDateTime: { gt: start }
+              start_date_time: { lt: end },
+              end_date_time: { gt: start }
             }
           ]
         }
@@ -143,22 +143,22 @@ export async function PUT(
         )
       }
 
-      updateData.startDateTime = start
-      updateData.endDateTime = end
+      updateData.start_date_time = start
+      updateData.end_date_time = end
 
       // Recalculate total hours and cost
-      const totalHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60)
-      const hourlyRate = existingBooking.facility.hourlyRate ? parseFloat(existingBooking.facility.hourlyRate.toString()) : 0
+      const total_hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+      const hourlyRate = existingBooking.facilities.hourlyRate ? parseFloat(existingBooking.facilities.hourlyRate.toString()) : 0
       
-      updateData.totalHours = totalHours
-      updateData.totalCost = hourlyRate > 0 ? totalHours * hourlyRate : null
+      updateData.total_hours = total_hours
+      updateData.total_cost = hourlyRate > 0 ? total_hours * hourlyRate : null
     }
 
-    const updatedBooking = await prisma.booking.update({
+    const updatedBooking = await prisma.bookings.update({
       where: { id },
       data: updateData,
       include: {
-        facility: {
+        facilities: {
           select: {
             id: true,
             name: true,
@@ -203,7 +203,7 @@ export async function DELETE(
     }
 
     // Update status to cancelled instead of hard delete
-    await prisma.booking.update({
+    await prisma.bookings.update({
       where: { id },
       data: { status: 'cancelled' }
     })

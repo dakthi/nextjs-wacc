@@ -15,24 +15,24 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url)
-    const facilityId = searchParams.get('facilityId')
+    const facility_id = searchParams.get('facility_id')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const status = searchParams.get('status')
 
     const where: any = {}
     
-    if (facilityId) {
-      where.facilityId = parseInt(facilityId)
+    if (facility_id) {
+      where.facility_id = parseInt(facility_id)
     }
     
     if (startDate || endDate) {
-      where.startDateTime = {}
+      where.start_date_time = {}
       if (startDate) {
-        where.startDateTime.gte = new Date(startDate)
+        where.start_date_time.gte = new Date(startDate)
       }
       if (endDate) {
-        where.startDateTime.lte = new Date(endDate)
+        where.start_date_time.lte = new Date(endDate)
       }
     }
     
@@ -40,10 +40,10 @@ export async function GET(request: NextRequest) {
       where.status = status
     }
 
-    const bookings = await prisma.booking.findMany({
+    const bookings = await prisma.bookings.findMany({
       where,
       include: {
-        facility: {
+        facilities: {
           select: {
             id: true,
             name: true,
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: { startDateTime: 'asc' }
+      orderBy: { start_date_time: 'asc' }
     })
 
     return NextResponse.json(bookings)
@@ -69,27 +69,27 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const {
-      facilityId,
-      customerName,
-      customerEmail,
-      customerPhone,
-      eventTitle,
-      eventDescription,
-      startDateTime,
-      endDateTime,
+      facility_id,
+      customer_name,
+      customer_email,
+      customer_phone,
+      event_title,
+      event_description,
+      start_date_time,
+      end_date_time,
       notes
     } = body
 
     // Validate required fields
-    if (!facilityId || !customerName || !customerEmail || !eventTitle || !startDateTime || !endDateTime) {
+    if (!facility_id || !customer_name || !customer_email || !event_title || !start_date_time || !end_date_time) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
     }
 
-    const start = new Date(startDateTime)
-    const end = new Date(endDateTime)
+    const start = new Date(start_date_time)
+    const end = new Date(end_date_time)
 
     // Validate date range
     if (start >= end) {
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     // Check if facility exists
     const facility = await prisma.facility.findUnique({
-      where: { id: facilityId },
+      where: { id: facility_id },
       select: { id: true, hourlyRate: true, active: true }
     })
 
@@ -113,14 +113,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for booking conflicts
-    const conflictingBookings = await prisma.booking.findMany({
+    const conflictingBookings = await prisma.bookings.findMany({
       where: {
-        facilityId,
+        facility_id,
         status: { in: ['pending', 'confirmed'] },
         OR: [
           {
-            startDateTime: { lt: end },
-            endDateTime: { gt: start }
+            start_date_time: { lt: end },
+            end_date_time: { gt: start }
           }
         ]
       }
@@ -134,28 +134,29 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate total hours and cost
-    const totalHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60)
-    const hourlyRate = facility.hourlyRate ? parseFloat(facility.hourlyRate.toString()) : 0
-    const totalCost = hourlyRate > 0 ? totalHours * hourlyRate : null
+    const total_hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+    const hourly_rate = facility.hourlyRate ? parseFloat(facility.hourlyRate.toString()) : 0
+    const total_cost = hourly_rate > 0 ? total_hours * hourly_rate : null
 
-    const booking = await prisma.booking.create({
+    const booking = await prisma.bookings.create({
       data: {
-        facilityId,
-        customerName,
-        customerEmail,
-        customerPhone,
-        eventTitle,
-        eventDescription,
-        startDateTime: start,
-        endDateTime: end,
-        totalHours,
-        hourlyRate: facility.hourlyRate,
-        totalCost,
+        facility_id,
+        customer_name,
+        customer_email,
+        customer_phone,
+        event_title,
+        event_description,
+        start_date_time: start,
+        end_date_time: end,
+        total_hours,
+        hourly_rate: facility.hourlyRate,
+        total_cost,
         notes,
-        status: 'pending'
+        status: 'pending',
+        updated_at: new Date()
       },
       include: {
-        facility: {
+        facilities: {
           select: {
             id: true,
             name: true,

@@ -67,29 +67,30 @@ export async function getSettings(): Promise<SiteSettings> {
 
     // Override with database values
     settings.forEach(setting => {
-      let value = setting.value
+      let parsedValue: any = setting.value
       
       // Parse based on type
       switch (setting.type) {
         case 'boolean':
-          value = value === 'true'
+          parsedValue = setting.value === 'true'
           break
         case 'number':
-          value = value ? parseFloat(value) : 0
+          parsedValue = setting.value ? parseFloat(setting.value) : 0
           break
         case 'json':
           try {
-            value = value ? JSON.parse(value) : null
+            parsedValue = setting.value ? JSON.parse(setting.value) : null
           } catch {
-            value = null
+            parsedValue = null
           }
           break
         default:
           // Keep as string
+          parsedValue = setting.value
           break
       }
       
-      settingsMap.set(setting.key, value)
+      settingsMap.set(setting.key, parsedValue)
     })
 
     // Update cache
@@ -186,7 +187,14 @@ export function useSettings() {
         social_twitter: '',
         social_instagram: '',
         booking_enabled: true,
-        maintenance_mode: false
+        maintenance_mode: false,
+        residents_served: '2,000+',
+        weekly_programs: '15+',
+        main_hall_capacity: '120',
+        opening_hours_text: '7 days',
+        opening_hours_details: 'Open Monday to Sunday, 9am-10pm',
+        hero_subtitle: 'Your local hub for education, leisure, and recreational programs. We serve over 2,000 residents in West Acton with 15+ regular programs every week.',
+        hero_description: 'From Stay & Play sessions for young families to martial arts, fitness classes, and cultural groups — we\'re here to bring our community together and support wellbeing for all ages.'
       }
     }
   }

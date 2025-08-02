@@ -5,12 +5,12 @@ import { prisma } from '@/lib/prisma'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const facilityId = searchParams.get('facilityId')
+    const facility_id = searchParams.get('facility_id')
     const date = searchParams.get('date')
     
-    if (!facilityId || !date) {
+    if (!facility_id || !date) {
       return NextResponse.json(
-        { error: 'facilityId and date are required' },
+        { error: 'facility_id and date are required' },
         { status: 400 }
       )
     }
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     // Get facility
     const facility = await prisma.facility.findUnique({
-      where: { id: parseInt(facilityId) },
+      where: { id: parseInt(facility_id) },
       select: {
         id: true,
         name: true,
@@ -42,14 +42,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Get day of week (0 = Sunday, 1 = Monday, etc.)
-    const dayOfWeek = targetDate.getDay()
+    const day_of_week = targetDate.getDay()
 
     // Get availability settings for this facility and day
-    const availability = await prisma.bookingAvailability.findUnique({
+    const availability = await prisma.booking_availability.findUnique({
       where: {
-        facilityId_dayOfWeek: {
-          facilityId: parseInt(facilityId),
-          dayOfWeek
+        facility_id_day_of_week: {
+          facility_id: parseInt(facility_id),
+          day_of_week
         }
       }
     })
@@ -57,15 +57,15 @@ export async function GET(request: NextRequest) {
     // Default availability if not set
     const defaultStart = "09:00"
     const defaultEnd = "22:00"
-    const startTime = availability?.startTime || defaultStart
-    const endTime = availability?.endTime || defaultEnd
-    const isAvailable = availability?.isAvailable ?? true
+    const start_time = availability?.start_time || defaultStart
+    const end_time = availability?.end_time || defaultEnd
+    const is_available = availability?.is_available ?? true
 
-    if (!isAvailable) {
+    if (!is_available) {
       return NextResponse.json({
         facility,
         date: targetDate.toISOString().split('T')[0],
-        dayOfWeek,
+        day_of_week,
         available: false,
         timeSlots: [],
         message: 'Facility is not available on this day'
@@ -79,24 +79,24 @@ export async function GET(request: NextRequest) {
     const endOfDay = new Date(targetDate)
     endOfDay.setHours(23, 59, 59, 999)
 
-    const existingBookings = await prisma.booking.findMany({
+    const existingBookings = await prisma.bookings.findMany({
       where: {
-        facilityId: parseInt(facilityId),
+        facility_id: parseInt(facility_id),
         status: { in: ['pending', 'confirmed'] },
-        startDateTime: { gte: startOfDay },
-        endDateTime: { lte: endOfDay }
+        start_date_time: { gte: startOfDay },
+        end_date_time: { lte: endOfDay }
       },
       select: {
-        startDateTime: true,
-        endDateTime: true
+        start_date_time: true,
+        end_date_time: true
       },
-      orderBy: { startDateTime: 'asc' }
+      orderBy: { start_date_time: 'asc' }
     })
 
     // Generate available time slots (30-minute intervals)
     const timeSlots = []
-    const [startHour, startMinute] = startTime.split(':').map(Number)
-    const [endHour, endMinute] = endTime.split(':').map(Number)
+    const [startHour, startMinute] = start_time.split(':').map(Number)
+    const [endHour, endMinute] = end_time.split(':').map(Number)
 
     const slotStart = new Date(targetDate)
     slotStart.setHours(startHour, startMinute, 0, 0)
@@ -115,20 +115,20 @@ export async function GET(request: NextRequest) {
 
       // Check if this slot conflicts with existing bookings
       const hasConflict = existingBookings.some(booking => {
-        const bookingStart = new Date(booking.startDateTime)
-        const bookingEnd = new Date(booking.endDateTime)
+        const bookingStart = new Date(booking.start_date_time)
+        const bookingEnd = new Date(booking.end_date_time)
         return slotStart < bookingEnd && slotEnd > bookingStart
       })
 
       timeSlots.push({
-        startTime: slotStart.toISOString(),
-        endTime: slotEnd.toISOString(),
-        startTimeDisplay: slotStart.toLocaleTimeString('en-GB', { 
+        start_time: slotStart.toISOString(),
+        end_time: slotEnd.toISOString(),
+        start_timeDisplay: slotStart.toLocaleTimeString('en-GB', { 
           hour: '2-digit', 
           minute: '2-digit',
           hour12: false 
         }),
-        endTimeDisplay: slotEnd.toLocaleTimeString('en-GB', { 
+        end_timeDisplay: slotEnd.toLocaleTimeString('en-GB', { 
           hour: '2-digit', 
           minute: '2-digit',
           hour12: false 
@@ -143,11 +143,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       facility,
       date: targetDate.toISOString().split('T')[0],
-      dayOfWeek,
+      day_of_week,
       available: true,
       operatingHours: {
-        start: startTime,
-        end: endTime
+        start: start_time,
+        end: end_time
       },
       timeSlots,
       existingBookings: existingBookings.length
